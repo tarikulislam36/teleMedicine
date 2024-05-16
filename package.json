@@ -1,0 +1,24 @@
+{
+  "name": "telemedicine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarikulislam36/teleMedicine.git"
+  },
+  "author": "Tarikul",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tarikulislam36/teleMedicine/issues"
+  },
+  "homepage": "https://github.com/tarikulislam36/teleMedicine#readme",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}

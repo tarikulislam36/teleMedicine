@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./output.css" rel="stylesheet">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@simondmc/popup-js@1.4.3/popup.min.js"></script>
+</head>
+<body class=" h-screen">
+    
+    <div class="min-h-screen flex">
+        <div class="flex-1 bg-gray-300">
+            <div class="flex justify-center items-center h-screen border-8 ">
+                <div class="bg-sky-500 p-4 rounded-lg shadow-lg">
+                    sasasasa
+                </div>
+
+            </div>
+
+        </div>
+        <div class="w-96 border-8 ">Right Screen</div>
+      </div>
+      <button onclick="loadCallback()">Click me</button>
+
+      <script>
+const popup = new Popup({
+    id: "override",
+    title: "Data Conflict",
+    content: `Your cloud data and local data are different. Which one do you want to use?
+      custom-space-out big-margin§{btn-refuse-override}[Local Data]{btn-accept-override}[Cloud Data]`,
+    sideMargin: "1.5em",
+    fontSizeMultiplier: "1.2",
+    backgroundColor: "#FFFEE3",
+    allowClose: false,
+    css: `
+    .popup.override .custom-space-out {
+        display: flex;
+        justify-content: center;
+        gap: 1.5em;
+    }`,
+    loadCallback: () => {
+        /* button functionality */
+        document.querySelector(".popup.board button.refuse-override").onclick =
+            () => {
+                popup.hide();
+                // user wants to use local data
+            };
+
+        document.querySelector(".popup.board button.accept-override").onclick =
+            () => {
+                popup.hide();
+                // user wants to use cloud data
+            };
+    },
+});
+
+      </script>
+</body>
+</html>
