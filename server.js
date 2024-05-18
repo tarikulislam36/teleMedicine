@@ -182,5 +182,14 @@ console.log(connectedSockets);
         socket.to(socketIdToAnswer).emit('hangUp');
     });
 
+    //message
+    socket.on('send-message', ({ message, toUser }) => {
+        const socketToMessage = connectedSockets.find(s => s.userName === toUser);
+        if (socketToMessage) {
+            // Send the message to the specified user
+            io.to(socketToMessage.socketId).emit('receive-message', { fromUser: userName, message });
+        }
+    });
+    
 
 })

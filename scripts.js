@@ -1,3 +1,4 @@
+
 let userName;
 let url = new URL(window.location.href);
 userName = url.searchParams.get('userName');
@@ -68,12 +69,12 @@ const answerOffer = async (offerObj) => {
 const addAnswer = async (offerObj) => {
     await peerConnection.setRemoteDescription(offerObj.answer);
 };
-
 const fetchUserMedia = () => {
     return new Promise(async (resolve, reject) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: true,
+                audio: true, // Add audio constraint
             });
             localVideoEl.srcObject = stream;
             localStream = stream;
@@ -168,8 +169,13 @@ document.querySelector('#hang-up').addEventListener('click', () => {
         remoteStream.getTracks().forEach(track => track.stop());
     }
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
-    console.log("peerConnection closed and streams stopped! Hang up complete! Bye! Bye!");
+    console.log("peerConnection closed and streams stopped! Hang up complete! Bye! Bye!"); 
+    
+   // hangUpClient();
 });
+
+// Hang up the call on the client side
+
 
 socket.on('hangUp', () => {
    
@@ -190,3 +196,80 @@ socket.on('hangUp', () => {
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
     alert("The other user has hung up!");
 });
+
+
+
+
+
+//modal
+/*const callModal = document.getElementById('callModal');
+const openModalButton = document.getElementById('openModalButton');
+const acceptButton = document.getElementById('acceptButton');
+const declineButton = document.getElementById('declineButton');
+
+openModalButton.addEventListener('click', function() {
+    callModal.classList.remove('hidden');
+});
+
+acceptButton.addEventListener('click', function() {
+    // Handle the call acceptance logic
+    // For example, you can start the call here
+    callModal.classList.add('hidden');
+});
+
+declineButton.addEventListener('click', function() {
+    // Handle the call rejection logic
+    // For example, you can decline the call here
+    callModal.classList.add('hidden');
+}); */
+
+
+const chatInput = document.querySelector('#chat-input');
+const sendMessageButton = document.querySelector('#send-message');
+const chatMessages = document.querySelector('#chat-messages');
+
+sendMessageButton.addEventListener('click', () => {
+    const message = chatInput.value;
+    if (message.trim() !== '') {
+        // Send the message to the connected user
+        socket.emit('send-message', { message, toUser: userB });
+        // Display the message locally
+        displayMessage(userName, message);
+        // Clear the chat input
+        chatInput.value = '';
+    }
+});
+
+socket.on('receive-message', ({ fromUser, message }) => {
+    // Display the received message
+    displayMessage(fromUser, message);
+});
+
+function displayMessage(user, message) {
+    const messageElement = document.createElement('div');
+    messageElement.innerText = `${user}: ${message}`;
+    chatMessages.appendChild(messageElement);
+}
+// mute 
+const muteButton = document.querySelector('#mute');
+const unmuteButton = document.querySelector('#unmute');
+
+muteButton.addEventListener('click', () => {
+    toggleAudio(true);
+    muteButton.style.display = 'none';
+    unmuteButton.style.display = 'block';
+});
+
+unmuteButton.addEventListener('click', () => {
+    toggleAudio(false);
+    muteButton.style.display = 'block';
+    unmuteButton.style.display = 'none';
+});
+
+function toggleAudio(muted) {
+    if (localStream) {
+        localStream.getAudioTracks().forEach(track => {
+            track.enabled = !muted;
+        });
+    }
+}
