@@ -1,3 +1,4 @@
+
 let userName;
 let url = new URL(window.location.href);
 userName = url.searchParams.get('userName');
@@ -168,8 +169,13 @@ document.querySelector('#hang-up').addEventListener('click', () => {
         remoteStream.getTracks().forEach(track => track.stop());
     }
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
-    console.log("peerConnection closed and streams stopped! Hang up complete! Bye! Bye!");
+    console.log("peerConnection closed and streams stopped! Hang up complete! Bye! Bye!"); 
+    
+   // hangUpClient();
 });
+
+// Hang up the call on the client side
+
 
 socket.on('hangUp', () => {
    
@@ -190,3 +196,29 @@ socket.on('hangUp', () => {
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
     alert("The other user has hung up!");
 });
+
+
+
+
+
+//modal
+/*const callModal = document.getElementById('callModal');
+const openModalButton = document.getElementById('openModalButton');
+const acceptButton = document.getElementById('acceptButton');
+const declineButton = document.getElementById('declineButton');
+
+openModalButton.addEventListener('click', function() {
+    callModal.classList.remove('hidden');
+});
+
+acceptButton.addEventListener('click', function() {
+    // Handle the call acceptance logic
+    // For example, you can start the call here
+    callModal.classList.add('hidden');
+});
+
+declineButton.addEventListener('click', function() {
+    // Handle the call rejection logic
+    // For example, you can decline the call here
+    callModal.classList.add('hidden');
+}); */
