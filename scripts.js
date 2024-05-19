@@ -7,13 +7,21 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;
 
-const socket = io.connect('https://localhost:8181/', {
+const socket = io.connect('https://3.6.214.118:8181/', {
     auth: {
         userName,
         password
     }
 });
 
+
+
+
+// oncall
+document.addEventListener('DOMContentLoaded', (event) => {
+    // Your function to call when the website is loading or reloading
+    call();
+});
 const localVideoEl = document.querySelector('#local-video');
 const remoteVideoEl = document.querySelector('#remote-video');
 

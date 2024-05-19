@@ -24,14 +24,14 @@ function createOfferEls(offers){
     //make green answer button for this new offer
     const answerEl = document.querySelector('#answer');
     offers.forEach(o=>{
-       // answerOffer(o)
+       answerOffer(o)
         console.log(o);
-        const newOfferEl = document.createElement('div');
+/*        const newOfferEl = document.createElement('div');
         newOfferEl.innerHTML = `<button class="btn btn-success col-1">Answer ${o.offererUserName}</button>`
         newOfferEl.addEventListener('click',()=>answerOffer(o))
         answerEl.appendChild(newOfferEl);
 
-        alert("New offer from "+o.offererUserName);
+  */    //  alert("New offer from "+o.offererUserName);
         
     })
 }
