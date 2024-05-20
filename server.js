@@ -1,12 +1,11 @@
 const fs = require('fs');
 const https = require('https');
 const express = require('express');
-const app = express();
 const socketio = require('socket.io');
+
+const app = express();
 app.use(express.static(__dirname));
 
-
-let senderSocketId;
 // Load SSL certificates
 const key = fs.readFileSync('cert.key');
 const cert = fs.readFileSync('cert.crt');
@@ -24,6 +23,7 @@ const io = socketio(expressServer, {
         methods: ["GET", "POST"]
     }
 });
+
 expressServer.listen(8181);
 
 // Initialize data structures for offers and connected sockets
@@ -32,10 +32,28 @@ const connectedSockets = [];
 
 // Handle new socket connections
 io.on('connection', (socket) => {
-    const { userName, password,token } = socket.handshake.auth;
+    const { userName, password, token } = socket.handshake.auth;
 
     // Disconnect if password is incorrect
     if (password !== "x") {
+        socket.disconnect(true);
+        return;
+    }
+
+    // Check if there are already two users connected with the same token
+    const usersWithSameUserNAMEID = connectedSockets.filter(s => s.userName === userName);
+    if (usersWithSameUserNAMEID.length >= 1) {
+       
+        socket.emit('redirect', '/notAllowedUser.html');
+        socket.disconnect(true);
+        return;
+    }
+
+    const usersWithSameToken = connectedSockets.filter(s => s.token === token);
+
+    if (usersWithSameToken.length >= 2) {
+        // Redirect the third user to notAllowed.html
+        socket.emit('redirect', '/notAllowed.html');
         socket.disconnect(true);
         return;
     }
@@ -48,8 +66,8 @@ io.on('connection', (socket) => {
     socket.on('newOffer', (data) => {
         const { offer, toUser, token } = data;
         senderSocketId = socket.id;
-        const socketToAnswer =  connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
-        
+        const socketToAnswer = connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+
         if (!socketToAnswer) {
             console.log("No matching socket");
             return;
@@ -116,6 +134,15 @@ io.on('connection', (socket) => {
     // Handle disconnections
     socket.on('disconnect', () => {
         const index = connectedSockets.findIndex(s => s.socketId === socket.id);
+        const remoteUserToHangUp2 = connectedSockets.find(s => s.token === token );
+
+        if (!remoteUserToHangUp2) {
+            console.log("No matching socket");
+            return;
+        }
+        const socketIdToAnswer = remoteUserToHangUp2.socketId;
+        socket.to(socketIdToAnswer).emit('hangUp');
+        
         if (index !== -1) {
             connectedSockets.splice(index, 1);
         }
@@ -124,11 +151,11 @@ io.on('connection', (socket) => {
 
     // Handle hang up
     socket.on('hangUp', (data) => {
-        const { token} = data;
+        const { token } = data;
 
         senderSocketId = socket.id;
-        
-        const remoteUserToHangUp = connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+
+        const remoteUserToHangUp = connectedSockets.find(s => s.token === token);
 
         if (!remoteUserToHangUp) {
             console.log("No matching socket");
@@ -141,9 +168,12 @@ io.on('connection', (socket) => {
     // Handle messages
     socket.on('send-message', ({ message, msgTo }) => {
         senderSocketId = socket.id;
-        const socketToMessage =  connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+        const socketToMessage = connectedSockets.find(s => s.token === msgTo && s.socketId !== senderSocketId);
+        
         if (socketToMessage) {
             io.to(socketToMessage.socketId).emit('receive-message', { fromUser: userName, message });
+        } else {
+            io.to(senderSocketId).emit('receive-message', { fromUser: 'System', message: 'Please wait, there is no remote user connected.' });
         }
     });
 });

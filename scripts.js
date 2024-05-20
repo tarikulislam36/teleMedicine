@@ -8,14 +8,17 @@ userName = url.searchParams.get('userName');
 let userB = url.searchParams.get('userb');
 
 const password = "x";
-document.querySelector('#user-name').innerHTML = userName;
+document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://3.6.214.118:8181/', {
+const socket = io.connect('https://localhost:8181/', {
     auth: {
         userName,
         password,
         token
     }
+});
+socket.on('redirect', (url) => {
+    window.location.href = url;
 });
 
 
@@ -26,6 +29,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Your function to call when the website is loading or reloading
     call();
 });
+
+
+  
 const localVideoEl = document.querySelector('#local-video');
 const remoteVideoEl = document.querySelector('#remote-video');
 
@@ -63,7 +69,7 @@ const call = async e => {
         didIOffer = true;
         socket.emit('newOffer', { offer, toUser: userB, token });
     } catch (err) {
-        console.log(err);
+        //console.log(err);
     }
 };
 
@@ -97,7 +103,7 @@ const fetchUserMedia = () => {
             localStream = stream;
             resolve();
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             reject();
         }
     });
@@ -120,7 +126,7 @@ const createPeerConnection = (offerObj) => {
 
         peerConnection.addEventListener('icecandidate', e => {
             console.log('........Ice candidate found!......');
-            console.log(e);
+           // console.log(e);
             if (e.candidate) {
                 socket.emit('sendIceCandidateToSignalingServer', {
                     iceCandidate: e.candidate,
@@ -132,7 +138,7 @@ const createPeerConnection = (offerObj) => {
 
         peerConnection.addEventListener('track', e => {
             console.log("Got a track from the other peer!! How exciting");
-            console.log(e);
+            //console.log(e);
             e.streams[0].getTracks().forEach(track => {
                 remoteStream.addTrack(track, remoteStream);
                 console.log("Here's an exciting moment... fingers crossed");
@@ -211,7 +217,7 @@ socket.on('hangUp', () => {
         remoteStream.getTracks().forEach(track => track.stop());
     }
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
-    alert("The other user has hung up!");
+   // alert("The other user has hung up!");
 });
 
 
@@ -290,3 +296,15 @@ function toggleAudio(muted) {
         });
     }
 }
+
+
+
+//REcall after 5sec  
+
+setTimeout(function() {
+    if (remoteStream) {
+        console.log("You are already connected");
+    }else{
+        call(); }
+        
+  }, 5000);
