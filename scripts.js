@@ -10,7 +10,7 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://localhost:8181/', {
+const socket = io.connect('https://3.6.214.118:8181/', {
     auth: {
         userName,
         password,
@@ -302,9 +302,11 @@ function toggleAudio(muted) {
 //REcall after 5sec  
 
 setTimeout(function() {
-    if (remoteStream) {
-        console.log("You are already connected");
+    if (!peerConnection) {
+        console.log("You are not connected");
+        call();
     }else{
-        call(); }
+        console.log("You are already connected");
+         }
         
   }, 5000);
