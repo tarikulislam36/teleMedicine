@@ -5,6 +5,8 @@ const app = express();
 const socketio = require('socket.io');
 app.use(express.static(__dirname));
 
+
+let senderSocketId;
 // Load SSL certificates
 const key = fs.readFileSync('cert.key');
 const cert = fs.readFileSync('cert.crt');
@@ -30,7 +32,7 @@ const connectedSockets = [];
 
 // Handle new socket connections
 io.on('connection', (socket) => {
-    const { userName, password } = socket.handshake.auth;
+    const { userName, password,token } = socket.handshake.auth;
 
     // Disconnect if password is incorrect
     if (password !== "x") {
@@ -39,13 +41,15 @@ io.on('connection', (socket) => {
     }
 
     // Add new connection to the connectedSockets array
-    connectedSockets.push({ socketId: socket.id, userName });
+    connectedSockets.push({ socketId: socket.id, userName, token });
     console.log(connectedSockets);
 
     // Handle new offers
     socket.on('newOffer', (data) => {
-        const { offer, toUser } = data;
-        const socketToAnswer = connectedSockets.find(s => s.userName === toUser);
+        const { offer, toUser, token } = data;
+        senderSocketId = socket.id;
+        const socketToAnswer =  connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+        
         if (!socketToAnswer) {
             console.log("No matching socket");
             return;
@@ -53,6 +57,7 @@ io.on('connection', (socket) => {
         const socketIdToAnswer = socketToAnswer.socketId;
         offers.push({
             offererUserName: userName,
+            tokenID: token,
             offer,
             offerIceCandidates: [],
             answererUserName: null,
@@ -119,8 +124,12 @@ io.on('connection', (socket) => {
 
     // Handle hang up
     socket.on('hangUp', (data) => {
-        const { toUser } = data;
-        const remoteUserToHangUp = connectedSockets.find(s => s.userName === toUser);
+        const { token} = data;
+
+        senderSocketId = socket.id;
+        
+        const remoteUserToHangUp = connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+
         if (!remoteUserToHangUp) {
             console.log("No matching socket");
             return;
@@ -130,8 +139,9 @@ io.on('connection', (socket) => {
     });
 
     // Handle messages
-    socket.on('send-message', ({ message, toUser }) => {
-        const socketToMessage = connectedSockets.find(s => s.userName === toUser);
+    socket.on('send-message', ({ message, msgTo }) => {
+        senderSocketId = socket.id;
+        const socketToMessage =  connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
         if (socketToMessage) {
             io.to(socketToMessage.socketId).emit('receive-message', { fromUser: userName, message });
         }

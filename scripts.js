@@ -2,15 +2,19 @@
 let userName;
 let url = new URL(window.location.href);
 userName = url.searchParams.get('userName');
+ let token = url.searchParams.get('token');
+//let userB = url.searchParams.get('userb');
+
 let userB = url.searchParams.get('userb');
 
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;
 
-const socket = io.connect('https://3.6.214.118:8181/', {
+const socket = io.connect('https://localhost:8181/', {
     auth: {
         userName,
-        password
+        password,
+        token
     }
 });
 
@@ -57,7 +61,7 @@ const call = async e => {
         console.log(offer);
         peerConnection.setLocalDescription(offer);
         didIOffer = true;
-        socket.emit('newOffer', { offer, toUser: userB });
+        socket.emit('newOffer', { offer, toUser: userB, token });
     } catch (err) {
         console.log(err);
     }
@@ -171,7 +175,7 @@ document.querySelector('#hang-up').addEventListener('click', () => {
         peerConnection = null;
         didIOffer = false;
 
-        socket.emit('hangUp', { toUser: userB });
+        socket.emit('hangUp', { token: token });
 
 
     }
@@ -245,7 +249,7 @@ sendMessageButton.addEventListener('click', () => {
     const message = chatInput.value;
     if (message.trim() !== '') {
         // Send the message to the connected user
-        socket.emit('send-message', { message, toUser: userB });
+        socket.emit('send-message', { message, msgTo: token });
         // Display the message locally
         displayMessage(userName, message);
         // Clear the chat input
