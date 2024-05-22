@@ -7,11 +7,8 @@ const app = express();
 app.use(express.static(__dirname));
 
 // Load SSL certificates
-   const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
+const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
 const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
-
-// const key = fs.readFileSync('cert.key');
-// const cert = fs.readFileSync('cert.crt');
 
 // Create an HTTPS server
 const expressServer = https.createServer({ key, cert }, app);
@@ -20,6 +17,7 @@ const expressServer = https.createServer({ key, cert }, app);
 const io = socketio(expressServer, {
     cors: {
         origin: [
+            "https://test.findnewcars.com",
             "https://localhost",
             "https://168.235.89.123:8181"
         ],
@@ -27,7 +25,9 @@ const io = socketio(expressServer, {
     }
 });
 
-expressServer.listen(8181);
+expressServer.listen(8181, () => {
+    console.log('Server is running on https://test.findnewcars.com:8181');
+});
 
 // Initialize data structures for offers and connected sockets
 const offers = [];
@@ -46,16 +46,13 @@ io.on('connection', (socket) => {
     // Check if there are already two users connected with the same token
     const usersWithSameUserNAMEID = connectedSockets.filter(s => s.userName === userName);
     if (usersWithSameUserNAMEID.length >= 1) {
-       
         socket.emit('redirect', '/notAllowedUser.html');
         socket.disconnect(true);
         return;
     }
 
     const usersWithSameToken = connectedSockets.filter(s => s.token === token);
-
     if (usersWithSameToken.length >= 2) {
-        // Redirect the third user to notAllowed.html
         socket.emit('redirect', '/notAllowed.html');
         socket.disconnect(true);
         return;
@@ -67,14 +64,15 @@ io.on('connection', (socket) => {
 
     // Handle new offers
     socket.on('newOffer', (data) => {
-        const { offer, toUser, token } = data;
-        senderSocketId = socket.id;
+        const { offer, token } = data;
+        const senderSocketId = socket.id;
         const socketToAnswer = connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
 
         if (!socketToAnswer) {
             console.log("No matching socket");
             return;
         }
+
         const socketIdToAnswer = socketToAnswer.socketId;
         offers.push({
             offererUserName: userName,
@@ -95,12 +93,14 @@ io.on('connection', (socket) => {
             console.log("No matching socket");
             return;
         }
+
         const socketIdToAnswer = socketToAnswer.socketId;
         const offerToUpdate = offers.find(o => o.offererUserName === offerObj.offererUserName);
         if (!offerToUpdate) {
             console.log("No OfferToUpdate");
             return;
         }
+
         ackFunction(offerToUpdate.offerIceCandidates);
         offerToUpdate.answer = offerObj.answer;
         offerToUpdate.answererUserName = userName;
@@ -137,15 +137,16 @@ io.on('connection', (socket) => {
     // Handle disconnections
     socket.on('disconnect', () => {
         const index = connectedSockets.findIndex(s => s.socketId === socket.id);
-        const remoteUserToHangUp2 = connectedSockets.find(s => s.token === token );
+        const remoteUserToHangUp2 = connectedSockets.find(s => s.token === token);
 
         if (!remoteUserToHangUp2) {
             console.log("No matching socket");
             return;
         }
+
         const socketIdToAnswer = remoteUserToHangUp2.socketId;
         socket.to(socketIdToAnswer).emit('hangUp');
-        
+
         if (index !== -1) {
             connectedSockets.splice(index, 1);
         }
@@ -157,22 +158,22 @@ io.on('connection', (socket) => {
         const { token } = data;
 
         senderSocketId = socket.id;
-
         const remoteUserToHangUp = connectedSockets.find(s => s.token === token);
 
         if (!remoteUserToHangUp) {
             console.log("No matching socket");
             return;
         }
+
         const socketIdToAnswer = remoteUserToHangUp.socketId;
         socket.to(socketIdToAnswer).emit('hangUp');
     });
 
     // Handle messages
     socket.on('send-message', ({ message, msgTo }) => {
-        senderSocketId = socket.id;
+        const senderSocketId = socket.id;
         const socketToMessage = connectedSockets.find(s => s.token === msgTo && s.socketId !== senderSocketId);
-        
+
         if (socketToMessage) {
             io.to(socketToMessage.socketId).emit('receive-message', { fromUser: userName, message });
         } else {
