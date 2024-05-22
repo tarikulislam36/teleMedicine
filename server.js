@@ -1,17 +1,11 @@
-const fs = require('fs');
-const https = require('https');
 const express = require('express');
 const socketio = require('socket.io');
 
 const app = express();
 app.use(express.static(__dirname));
 
-// Load SSL certificates
-const key = fs.readFileSync('cert.key');
-const cert = fs.readFileSync('cert.crt');
-
-// Create an HTTPS server
-const expressServer = https.createServer({ key, cert }, app);
+// Use your existing HTTPS server
+const expressServer = require('https').createServer(app);
 
 // Create a Socket.io server with CORS settings
 const io = socketio(expressServer, {
