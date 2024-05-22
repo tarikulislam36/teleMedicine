@@ -10,7 +10,7 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://test.findnewcars.com/', {
+const socket = io.connect('https://test.findnewcars.com:8181', {
     auth: {
         userName,
         password,
