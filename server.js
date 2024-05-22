@@ -18,7 +18,7 @@ const io = socketio(expressServer, {
     cors: {
         origin: [
             "https://localhost",
-            "https://3.6.214.118:8181"
+            "https://168.235.89.123:8181"
         ],
         methods: ["GET", "POST"]
     }
