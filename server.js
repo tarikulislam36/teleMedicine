@@ -1,11 +1,20 @@
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const socketio = require('socket.io');
 
 const app = express();
 app.use(express.static(__dirname));
 
-// Use your existing HTTPS server
-const expressServer = require('https').createServer(app);
+// Load SSL certificates
+   const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
+const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
+
+// const key = fs.readFileSync('cert.key');
+// const cert = fs.readFileSync('cert.crt');
+
+// Create an HTTPS server
+const expressServer = https.createServer({ key, cert }, app);
 
 // Create a Socket.io server with CORS settings
 const io = socketio(expressServer, {
