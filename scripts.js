@@ -28,6 +28,8 @@ socket.on('redirect', (url) => {
 document.addEventListener('DOMContentLoaded', (event) => {
     // Your function to call when the website is loading or reloading
    // call();
+
+fetchUserMedia();
 });
 
 
@@ -51,11 +53,26 @@ let peerConfiguration = {
               'stun:stun1.l.google.com:19302'
             ]
         },
-      {
-            urls: 'turn:192.158.29.39:3478?transport=tcp',
-            username: '28224511:1379330808',
-            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA='
-        }
+        {
+            urls: "turn:global.relay.metered.ca:80",
+            username: "1ff7d9a7c16c4e308a3005b1",
+            credential: "KLDDp1phCErTKi1k",
+          },
+          {
+            urls: "turn:global.relay.metered.ca:80?transport=tcp",
+            username: "1ff7d9a7c16c4e308a3005b1",
+            credential: "KLDDp1phCErTKi1k",
+          },
+          {
+            urls: "turn:global.relay.metered.ca:443",
+            username: "1ff7d9a7c16c4e308a3005b1",
+            credential: "KLDDp1phCErTKi1k",
+          },
+          {
+            urls: "turns:global.relay.metered.ca:443?transport=tcp",
+            username: "1ff7d9a7c16c4e308a3005b1",
+            credential: "KLDDp1phCErTKi1k",
+          },
     ]
 }
 
@@ -78,7 +95,7 @@ socket.on('WaitedRemoteUser', (JoinedUser) => {
 // last modified
 
     const call = async e => {
-        await fetchUserMedia();
+    
     
         await createPeerConnection();
     
@@ -355,6 +372,5 @@ function toggleAudio(muted) {
 //          }
         
 //   }, 5000);
-
 
 
