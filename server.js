@@ -4,19 +4,20 @@ const express = require('express');
 const socketio = require('socket.io');
 
 const app = express();
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/')); 
+
 
 // Load SSL certificates
-/*
+
 
 const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
 const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
 
 
-*/
 
-const key = fs.readFileSync('cert.key');
-const cert = fs.readFileSync('cert.crt');
+
+// const key = fs.readFileSync('cert.key');
+// const cert = fs.readFileSync('cert.crt');
 
 
 // Create an HTTPS server
@@ -28,15 +29,22 @@ const io = socketio(expressServer, {
         origin: [
             "https://test.findnewcars.com",
             "https://localhost",
-            "https://168.235.89.123:8181"
+            "https://168.235.89.123:443"
         ],
         methods: ["GET", "POST"]
     }
 });
 
-expressServer.listen(8181, () => {
-    console.log('Server is running on https://test.findnewcars.com:8181');
+expressServer.listen(443, () => {
+    console.log('Server is running on https://test.findnewcars.com:443');
 });
+
+// Modification 2: Serve ui.html when a user visits /room
+app.get('/room', (req, res) => {
+    res.sendFile(__dirname + '/ui.html');
+});
+
+
 
 // Initialize data structures for offers and connected sockets
 const offers = [];
