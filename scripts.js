@@ -10,7 +10,7 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://test.findnewcars.com:8181', {
+const socket = io.connect('https://localhost:8181', {
     auth: {
         userName,
         password,
@@ -27,7 +27,7 @@ socket.on('redirect', (url) => {
 // oncall
 document.addEventListener('DOMContentLoaded', (event) => {
     // Your function to call when the website is loading or reloading
-    call();
+   // call();
 });
 
 
@@ -39,6 +39,9 @@ let localStream;
 let remoteStream;
 let peerConnection;
 let didIOffer = false;
+
+
+
 
 let peerConfiguration = {
     iceServers:[
@@ -56,22 +59,64 @@ let peerConfiguration = {
     ]
 }
 
-const call = async e => {
-    await fetchUserMedia();
+// codeSafe
 
-    await createPeerConnection();
+// new Algo
 
-    try {
-        console.log("Creating offer...");
-        const offer = await peerConnection.createOffer();
-        console.log(offer);
-        peerConnection.setLocalDescription(offer);
-        didIOffer = true;
-        socket.emit('newOffer', { offer, toUser: userB, token });
-    } catch (err) {
-        //console.log(err);
-    }
-};
+// if User is available to connect
+socket.on('WaitedRemoteUser', (JoinedUser) => {
+    console.log("Remote User is available to connect");
+   // console.log(remoteUserToConnect);
+    console.log(JoinedUser);
+    //alert("Remote User is available to connect");
+   // alert("Remote User is available to connect", remoteUserToConnect);
+   
+
+
+
+
+// last modified
+
+    const call = async e => {
+        await fetchUserMedia();
+    
+        await createPeerConnection();
+    
+        try {
+            console.log("Creating offer...");
+            const offer = await peerConnection.createOffer();
+            console.log(offer);
+            peerConnection.setLocalDescription(offer);
+            didIOffer = true;
+            socket.emit('newOffer', { offer, toUser: JoinedUser, token });
+
+            console.log("TEsting, Accessable or not", JoinedUser);
+        } catch (err) {
+            //console.log(err);
+        }
+    };
+    
+    call(); 
+
+    // upto this is
+});
+
+
+// if User is not available to connect
+socket.on('NoUserFound', () => {
+    console.log("No User Found to connect");
+    alert("No User Found to connect");
+});
+
+
+
+//End codeSafe
+
+
+
+
+
+
 
 const answerOffer = async (offerObj) => {
     await fetchUserMedia();
@@ -301,12 +346,15 @@ function toggleAudio(muted) {
 
 //REcall after 5sec  
 
-setTimeout(function() {
-    if (!peerConnection) {
-        console.log("You are not connected");
-        call();
-    }else{
-        console.log("You are already connected");
-         }
+// setTimeout(function() {
+//     if (!peerConnection) {
+//         console.log("You are not connected");
+//       //  call();
+//     }else{
+//         console.log("You are already connected");
+//          }
         
-  }, 5000);
+//   }, 5000);
+
+
+

@@ -7,8 +7,17 @@ const app = express();
 app.use(express.static(__dirname));
 
 // Load SSL certificates
+/*
+
 const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
 const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
+
+
+*/
+
+const key = fs.readFileSync('cert.key');
+const cert = fs.readFileSync('cert.crt');
+
 
 // Create an HTTPS server
 const expressServer = https.createServer({ key, cert }, app);
@@ -57,16 +66,38 @@ io.on('connection', (socket) => {
         socket.disconnect(true);
         return;
     }
+ // find the user with the same token to establish a connection
+    const remoteUserToConnect = connectedSockets.find(s => s.token == token);
+
+    if (remoteUserToConnect) {  
+
+    const SitedUSer = remoteUserToConnect.socketId;
+    const JoinedUser = socket.id;
+    socket.to(SitedUSer).emit('WaitedRemoteUser',JoinedUser);
+    console.log("User Found to connect", remoteUserToConnect.userName);
+    console.log("testSocket", JoinedUser);
+         
+    }
+else {
+ socket.to(socket.id).emit('NoUserFound');
+
+    console.log("No User Found to connect");
+    }
+
+         
+
+
 
     // Add new connection to the connectedSockets array
     connectedSockets.push({ socketId: socket.id, userName, token });
-    console.log(connectedSockets);
+    console.log("New All user", connectedSockets);
 
     // Handle new offers
     socket.on('newOffer', (data) => {
-        const { offer, token } = data;
+        const { offer, token,toUser } = data;
         const senderSocketId = socket.id;
-        const socketToAnswer = connectedSockets.find(s => s.token === token && s.id !== senderSocketId);
+        const socketToAnswer = connectedSockets.find(s => s.socketId === toUser);
+
 
         if (!socketToAnswer) {
             console.log("No matching socket");
@@ -150,7 +181,7 @@ io.on('connection', (socket) => {
         if (index !== -1) {
             connectedSockets.splice(index, 1);
         }
-        console.log(connectedSockets);
+        console.log("available user", connectedSockets);
     });
 
     // Handle hang up
