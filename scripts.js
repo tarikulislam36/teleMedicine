@@ -374,3 +374,4 @@ function toggleAudio(muted) {
 //   }, 5000);
 
 
+// modifiy the only for when open the page it will automatically take camera accesss 
