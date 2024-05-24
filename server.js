@@ -10,14 +10,14 @@ app.use(express.static(__dirname + '/'));
 // Load SSL certificates
 
 
-// const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
-// const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
+const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
+const cert = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/fullchain.pem');
 
 
 
 
-const key = fs.readFileSync('cert.key');
-const cert = fs.readFileSync('cert.crt');
+// const key = fs.readFileSync('cert.key');
+// const cert = fs.readFileSync('cert.crt');
 
 
 // Create an HTTPS server
