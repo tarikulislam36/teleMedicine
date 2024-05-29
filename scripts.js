@@ -10,7 +10,7 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://test.findnewcars.com:443', {
+const socket = io.connect('https://localhost:8181', {
     auth: {
         userName,
         password,
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Your function to call when the website is loading or reloading
    // call();
 
-fetchUserMedia();
 });
 
 
@@ -96,6 +95,9 @@ socket.on('WaitedRemoteUser', (JoinedUser) => {
 
     const call = async e => {
     
+
+
+fetchUserMedia();
     
         await createPeerConnection();
     
