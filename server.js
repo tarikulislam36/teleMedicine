@@ -2,12 +2,16 @@ const fs = require('fs');
 const https = require('https');
 const express = require('express');
 const socketio = require('socket.io');
+const moment = require('moment-timezone');
+let nowIST;
 
 const app = express();
 app.use(express.static(__dirname + '/')); 
 
 
 // Load SSL certificates
+// Load SSL certificates
+
 
 
 const key = fs.readFileSync('/etc/letsencrypt/live/test.findnewcars.com/privkey.pem');
@@ -36,7 +40,7 @@ const io = socketio(expressServer, {
 });
 
 expressServer.listen(443, () => {
-    console.log('Server is running on https://test.findnewcars.com:443');
+    console.log('Server is running on https://test.findnewcars.com:8181');
 });
 
 // Modification 2: Serve ui.html when a user visits /room
@@ -52,7 +56,7 @@ const connectedSockets = [];
 
 // Handle new socket connections
 io.on('connection', (socket) => {
-    const { userName, password, token } = socket.handshake.auth;
+    const { userName, password, token ,CallType} = socket.handshake.auth;
 
     // Disconnect if password is incorrect
     if (password !== "x") {
@@ -84,6 +88,9 @@ io.on('connection', (socket) => {
     socket.to(SitedUSer).emit('WaitedRemoteUser',JoinedUser);
     console.log("User Found to connect", remoteUserToConnect.userName);
     console.log("testSocket", JoinedUser);
+
+    nowIST = moment().tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss'); // Start Time
+
          
     }
 else {
@@ -97,9 +104,11 @@ else {
 
 
     // Add new connection to the connectedSockets array
-    connectedSockets.push({ socketId: socket.id, userName, token });
+    connectedSockets.push({ socketId: socket.id, userName, token, CallType, nowIST });
+    socket.emit('updateUserList', connectedSockets);
+    
     console.log("New All user", connectedSockets);
-
+    
     // Handle new offers
     socket.on('newOffer', (data) => {
         const { offer, token,toUser } = data;
@@ -190,6 +199,7 @@ else {
             connectedSockets.splice(index, 1);
         }
         console.log("available user", connectedSockets);
+        io.emit('updateUserList', connectedSockets);
     });
 
     // Handle hang up
