@@ -2,42 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="theme-color" content="#03adfc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TeleMedicine</title>
      
 
   <link href="./output.css" rel="stylesheet">
+  
+<style>
+  .audio-level-container {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    position: relative;
+  }
+  
+  .audio-level-bar {
+    height: 100%;
+    background-color: #76c7c0;
+    width: 0;
+    transition: width 0.1s;
+  }
+
+
+  .chat-popup {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  transition: bottom 0.3s;
+  z-index: 1000;
+}
+.chat-popup.show {
+  bottom: 0;
+}
+
+
+
+
+.chat-popup {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+  transition: bottom 0.3s;
+  z-index: 1000;
+}
+.chat-popup.show {
+  bottom: 0;
+}
+
+#notification-dot {
+  top: -5px; 
+  right: -5px; 
+  height: 8px; 
+  width: 8px; 
+  background-color: #1e90ff; 
+  border-radius: 50%; 
+}
+
+
+  </style>
 </head>
-<body class="bg-gray-100">
+<div class="audio-level-container">
+  <div id="remote-audio-level" class="audio-level-bar"></div>
+</div>
+<body class="bg-white" style="background-color: #fcfeff;">
 
 
-    
 
-<div class="flex flex-col md:flex-row h-screen">
+<div class="flex flex-col md:flex-row h-screen bg-teal-500">
   <!-- Video Call Section -->
-  <div class="flex-1 bg-white p-4 flex flex-col justify-between">
+  <div class="flex-1  bg-slate-300 p-1 flex flex-col justify-between h-dvh" style="">
     <div class="flex-grow flex justify-center items-center">
-      <div class="relative w-full h-full flex justify-center items-center">
-        <video  class="w-full h-full object-cover rounded-md" id="remote-video" autoplay playsinline ></video> 
+      <div class="relative w-full h-full flex justify-center items-center" style="background-color:#ffffff;">
+        <video  class="w-auto md:h-full object-cover rounded-md" id="remote-video" autoplay playsinline ></video> 
         <!--  <img src="https://via.placeholder.com/800x600" alt="Main Video" class="w-full h-full object-cover rounded-md">  -->
-        <div class="absolute bottom-4 right-4 w-32 h-24 bg-white rounded-md overflow-hidden border">
-
-            <video class="video-player" id="local-video" class="w-full h-full object-cover" muted  autoplay playsinline></video>
+        <div class="absolute bottom-8 right-4 md:bottom-8 md:right-8  w-32 h-24 md:h-40 md:w-40  bg-slate-600 rounded-md overflow-hidden border justify-center items-center  content-center">
+          <div class="absolute top-0 left-0 text-white bg-black bg-opacity-50 rounded px-2 py-1"> <div id="user-name"></div> </div>
+            <video class="video-player" id="local-video" class="w-full h-full object-cover " muted  autoplay playsinline style="max-height:fit-content;"></video>
          <!--   <img src="https://via.placeholder.com/100x100" alt="User Video" class="w-full h-full object-cover">  -->
         </div>
-        <div class="absolute top-4 left-4 text-white bg-black bg-opacity-50 rounded px-2 py-1"> <div id="user-name"></div> </div>
-        <div class="absolute bottom-4 left-4 flex space-x-2">
-          <button class="bg-red-600 text-white rounded-full p-2" id="hang-up">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+        
+       <div class="absolute top-4 right-4 flex space-x-2">
+          <button class="bg-red-600 text-white rounded-full p-1 md:p-2 bg-opacity-50" id="hang-up">
+           Leave
           </button>
+          </div> 
           <!-- <button class="bg-gray-800 text-slate-500 rounded-full p-2">
             <svg class="h-8 w-8 text-slate-500"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round">  <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34l1 1L23 7v10" />  <line x1="1" y1="1" x2="23" y2="23" /></svg>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h2a6 6 0 015.196 3H18m0 0a6 6 0 01-5.196 3H5m13-3v5m0 0l3-3m-3 3l-3-3"/>
             </svg>
           </button> -->
-         <button class="bg-gray-800 text-slate-500 rounded-full p-2" id="mute">
+          <div class="absolute bottom-8 left-4 flex space-x-2"> 
+            <div class="absolute top-4 right-4  space-x-2 hidden" >
+              <button class="bg-red-600 text-white rounded-full p-2 bg-opacity-50" id="hang-up">
+               Leave
+              </button>
+              </div>
+<!-- Message Icon -->
+ <div class="hidden"> 
+<button class="bg-blue-700 text-slate-500 rounded-full p-2 md:hidden" id="call">
+  <svg class="text-slate-500" aria-hidden="true" focusable="false" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em"> <!--  Font Awesome Free 5.15.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--> <path d="M493.4 24.6l-104-24c-11.3-2.6-22.9 3.3-27.5 13.9l-48 112c-4.2 9.8-1.4 21.3 6.9 28l60.6 49.6c-36 76.7-98.9 140.5-177.2 177.2l-49.6-60.6c-6.8-8.3-18.2-11.1-28-6.9l-112 48C3.9 366.5-2 378.1.6 389.4l24 104C27.1 504.2 36.7 512 48 512c256.1 0 464-207.5 464-464 0-11.2-7.7-20.9-18.6-23.4z"/></svg>
+</svg> 
+</button>
+</div>
+<button class="bg-zinc-200 text-slate-500 rounded-full p-2 md:hidden bg-opacity-50" id="message_box">
+  <svg class="h-8 w-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</button>
+
+
+         <button class="bg-zinc-200  text-slate-500 rounded-full p-2 bg-opacity-50" id="mute">
     <svg class="h-8 w-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="1" y1="1" x2="23" y2="23" />
         <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
@@ -46,18 +127,35 @@
         <line x1="8" y1="23" x2="16" y2="23" />
     </svg>
 </button>
-<button class="bg-gray-800 text-slate-500 rounded-full p-2" id="unmute" style="display: none;">
+<button class="bg-zinc-200  text-slate-500 rounded-full p-2 bg-opacity-50" id="unmute" style="display: none;">
     <svg class="h-8 w-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="1" y1="1" x2="23" y2="23" />
         <path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
     </svg>
 </button>
+<!-- Video Mute -->
+<button class="bg-zinc-200 text-slate-500 rounded-full p-2 bg-opacity-50" id="muteVideo">
+  <svg class="h-8 w-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M23 7l-7 5 7 5V7z" />
+      <path d="M1 5h14l4 4v6l-4 4H1V5z" />
+  </svg>
+</button>
+<!-- Video unmute -->
+<button class="bg-zinc-200 text-slate-500 rounded-full p-2 bg-opacity-50" id="unmuteVideo" style="display: none;">
+  <svg class="h-8 w-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <path d="M15 9l-6 6" />
+      <path d="M9 9l6 6" />
+  </svg>
+</button>
 
-          <button class="bg-blue-700 text-slate-500 rounded-full p-2" id="call">
-            <svg class="text-slate-500" aria-hidden="true" focusable="false" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em"> <!--  Font Awesome Free 5.15.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)--> <path d="M493.4 24.6l-104-24c-11.3-2.6-22.9 3.3-27.5 13.9l-48 112c-4.2 9.8-1.4 21.3 6.9 28l60.6 49.6c-36 76.7-98.9 140.5-177.2 177.2l-49.6-60.6c-6.8-8.3-18.2-11.1-28-6.9l-112 48C3.9 366.5-2 378.1.6 389.4l24 104C27.1 504.2 36.7 512 48 512c256.1 0 464-207.5 464-464 0-11.2-7.7-20.9-18.6-23.4z"/></svg>
-	</svg> 
+          
               
+
+
+  
             <!-- </button>
             <button class="bg-gray-800 text-white rounded-full p-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,32 +167,66 @@
     </div>
   </div>
 
-  <!-- Chat Section -->
-  <div class="w-full md:w-1/3 bg-white p-4 border-l">
-    <div class="flex items-center mb-4">
-      <img src="https://via.placeholder.com/50x50" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
-      <div>
-        <div class="font-semibold">UserB</div>
-        <div class="text-gray-500 text-sm">Active now</div>
+  <!-- Chat Section --> 
+  <div class="w-full md:w-1/3 bg-slate-200 p-4 border-l hidden md:block">
+    
+    <div class="flex flex-col h-full bg-slate-200 border-y-1 p-4 ">
+
+      <div class="flex items-center mb-4">
+        <img src="https://via.placeholder.com/50x50" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+        <div>
+          <div class="font-semibold">UserB</div>
+          <div class="text-gray-500 text-sm">Active now</div>
+        </div>
       </div>
-    </div>
-    <div class="flex flex-col h-full">
-      <div class="flex-grow space-y-2">
+
+
+      <div class="flex-grow space-y-2 h-96  overflow-y-auto bg-white" id="msgbox">
         <!-- <div class="bg-blue-100 p-2 rounded-lg self-start">Hello!</div>
         <div class="bg-gray-100 p-2 rounded-lg self-start">How are you?</div>
-        <div class="bg-blue-100 p-2 rounded-lg self-end">I'm good, thank you!</div> -->
+        <div class="bg-blue-100 p-2 rounded-lg self-end">I'm good, thank you!</div> --> 
 
         <div class="bg-blue-600" id="answer" class="col"></div>
-        <div id="chat-messages" class="flex-grow space-y-2"></div>
+        <div id="chat-messages" class="flex-grow space-y-2 p-4 h-auto" style="word-break: break-word;
+"></div>
+ 
       </div>
-      <div class="mt-4 flex items-center">
-        <input type="text"  id="chat-input"  placeholder="Type a message" class="flex-grow p-2 border rounded-lg">
+     
+      <div class="mt-4 p-2 flex h-24 items-center  bg-slate-200">
+        <textarea type="text"  id="chat-input"  placeholder="Type a message" class="flex-grow  border rounded-lg bg-white"> </textarea>
         <button class="ml-2 bg-blue-500 text-white p-2 rounded-lg" id="send-message">Send</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Chat Popup -->
+ 
+<!-- Message Popup --><!-- Chat Popup --><div class="chat-popup" id="chatPopup">
+  <div class="flex flex-col h-full bg-slate-200 border-y-1 p-4"> 
+   
+    <div class="flex items-center mb-4">
+      <img src="https://via.placeholder.com/50x50" alt="User Avatar" class="w-10 h-10 rounded-full mr-2">
+      <div>
+        <div class="font-semibold">UserB</div>
+        <div class="text-gray-500 text-sm">Active now</div>
+        <button class="ml-2 bg-gray-500 text-white p-1 rounded-lg" id="hide-popup" style="position: absolute; right: 25px; top: 8px;">Hide</button>
+      </div>
+      
+    </div>
+    
+    <div class="flex-grow space-y-2 h-96 overflow-y-auto bg-white" id="popup-msgbox">
+      <div class="bg-blue-600" id="popup-answer" class="col"></div>
+      <div id="popup-chat-messages" class="flex-grow space-y-2 p-4 h-auto" style="word-break: break-word;"></div>
+    </div>
+    <div class="mt-4 p-2 flex h-24 items-center bg-slate-200">
+      <textarea type="text" id="popup-chat-input" placeholder="Type a message" class="flex-grow border rounded-lg"></textarea>
+      <button class="ml-2 bg-blue-500 text-white p-2 rounded-lg" id="popup-send-message">Send</button>
+    
+     
+    </div>
+  </div>
+</div>
 
 
 
@@ -117,6 +249,19 @@
 <div id="chat-messages" class="flex-grow space-y-2"></div> -->
 
 </body>
+
+<script>
+  document.getElementById('message_box').addEventListener('click', function() {
+    document.getElementById('chatPopup').classList.toggle('show');
+  });
+
+  document.getElementById('hide-popup').addEventListener('click', function() {
+    document.getElementById('chatPopup').classList.remove('show');
+  });
+  
+
+ 
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/6.1.4/adapter.js" integrity="sha512-r8cn1OoZ21KHc0zmav3+MtQS24AJLAaDdNNWYkOborAznLETtfBKMb6xkpqXnjcH1GmKG9BqPOW9tU/Jzy98kQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="/socket.io/socket.io.js"></script>

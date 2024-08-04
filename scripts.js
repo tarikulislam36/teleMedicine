@@ -1,8 +1,10 @@
 
+
 let userName;
 let url = new URL(window.location.href);
 userName = url.searchParams.get('userName');
  let token = url.searchParams.get('token');
+ let CallType = url.searchParams.get('CallType');
 //let userB = url.searchParams.get('userb');
 
 let userB = url.searchParams.get('userb');
@@ -10,11 +12,12 @@ let userB = url.searchParams.get('userb');
 const password = "x";
 document.querySelector('#user-name').innerHTML = userName;  
 
-const socket = io.connect('https://localhost:8181', {
+const socket = io.connect('https://localhost:3000', {
     auth: {
         userName,
         password,
-        token
+        token,
+        CallType
     }
 });
 socket.on('redirect', (url) => {
@@ -28,7 +31,6 @@ socket.on('redirect', (url) => {
 document.addEventListener('DOMContentLoaded', (event) => {
     // Your function to call when the website is loading or reloading
    // call();
-
 });
 
 
@@ -52,26 +54,11 @@ let peerConfiguration = {
               'stun:stun1.l.google.com:19302'
             ]
         },
-        {
-            urls: "turn:global.relay.metered.ca:80",
-            username: "1ff7d9a7c16c4e308a3005b1",
-            credential: "KLDDp1phCErTKi1k",
-          },
-          {
-            urls: "turn:global.relay.metered.ca:80?transport=tcp",
-            username: "1ff7d9a7c16c4e308a3005b1",
-            credential: "KLDDp1phCErTKi1k",
-          },
-          {
-            urls: "turn:global.relay.metered.ca:443",
-            username: "1ff7d9a7c16c4e308a3005b1",
-            credential: "KLDDp1phCErTKi1k",
-          },
-          {
-            urls: "turns:global.relay.metered.ca:443?transport=tcp",
-            username: "1ff7d9a7c16c4e308a3005b1",
-            credential: "KLDDp1phCErTKi1k",
-          },
+      {
+            urls: 'turn:192.158.29.39:3478?transport=tcp',
+            username: '28224511:1379330808',
+            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA='
+        }
     ]
 }
 
@@ -94,10 +81,7 @@ socket.on('WaitedRemoteUser', (JoinedUser) => {
 // last modified
 
     const call = async e => {
-    
-
-
-fetchUserMedia();
+        await fetchUserMedia();
     
         await createPeerConnection();
     
@@ -157,10 +141,11 @@ const addAnswer = async (offerObj) => {
     await peerConnection.setRemoteDescription(offerObj.answer);
 };
 const fetchUserMedia = () => {
+    if (CallType == 'audio') {
     return new Promise(async (resolve, reject) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
+                video: false, // Add video constraint
                 audio: true, // Add audio constraint
             });
             localVideoEl.srcObject = stream;
@@ -171,6 +156,34 @@ const fetchUserMedia = () => {
             reject();
         }
     });
+
+} else if (CallType == 'video') {
+
+
+ return new Promise(async (resolve, reject) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true, // Add video constraint
+                audio: true, // Add audio constraint
+            });
+            localVideoEl.srcObject = stream;
+            localStream = stream;
+            resolve();
+        } catch (err) {
+            //console.log(err);
+            reject();
+        }
+
+    });
+
+
+
+}else{
+
+    console.log("No Call Type Found");
+}
+
+
 };
 
 const createPeerConnection = (offerObj) => {
@@ -282,6 +295,8 @@ socket.on('hangUp', () => {
     }
     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
    // alert("The other user has hung up!");
+   console.log("The other user has leaved!");
+//    history.back()
 });
 
 
@@ -310,11 +325,22 @@ declineButton.addEventListener('click', function() {
     callModal.classList.add('hidden');
 }); */
 
-
+const messagesContainer = document.getElementById('msgbox');
 const chatInput = document.querySelector('#chat-input');
 const sendMessageButton = document.querySelector('#send-message');
 const chatMessages = document.querySelector('#chat-messages');
+// popUp chat
 
+const popupMessagesContainer = document.getElementById('popup-msgbox');
+const popupChatInput = document.querySelector('#popup-chat-input');
+const popupSendMessageButton = document.querySelector('#popup-send-message');
+const popupChatMessages = document.querySelector('#popup-chat-messages');
+const notificationDot = document.getElementById('notification-dot');
+const chatPopup = document.getElementById('chatPopup');
+const messageBoxButton = document.getElementById('message_box');
+let popupVisible = false;
+
+//normal Chat
 sendMessageButton.addEventListener('click', () => {
     const message = chatInput.value;
     if (message.trim() !== '') {
@@ -324,9 +350,13 @@ sendMessageButton.addEventListener('click', () => {
         displayMessage(userName, message);
         // Clear the chat input
         chatInput.value = '';
+        document.getElementById('chat-input').value = '';
     }
+    chatInput.value = '';
+
 });
 
+chatInput.value = '';
 socket.on('receive-message', ({ fromUser, message }) => {
     // Display the received message
     displayMessage(fromUser, message);
@@ -334,12 +364,65 @@ socket.on('receive-message', ({ fromUser, message }) => {
 
 function displayMessage(user, message) {
     const messageElement = document.createElement('div');
-    messageElement.innerText = `${user}: ${message}`;
+   messageElement.innerHTML = `<b>${user}</b>:  ${message}  `;
     chatMessages.appendChild(messageElement);
+    scrollToBottom();
+    
 }
+
+function scrollToBottom() {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+}
+
+
+// popup message 
+
+
+popupSendMessageButton.addEventListener('click', () => {
+    const message = popupChatInput.value;
+    if (message.trim() !== '') {
+        // Send the message to the connected user
+        socket.emit('send-message', { message, msgTo: token });
+        // Display the message locally
+        displayPopupMessage(userName, message);
+        // Clear the chat input
+        
+        popupChatInput.value = '';
+        
+    }
+});
+
+socket.on('POP-receive-message', ({ fromUser, message }) => {
+    // Display the received message
+    displayPopupMessage(fromUser, message);
+    // Show notification dot if the popup is not visible
+    if (!popupVisible) {
+        notificationDot.classList.remove('hidden');
+    }
+});
+
+function displayPopupMessage(user, message) {
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = `<b>${user}</b>: ${message}`;
+    popupChatMessages.appendChild(messageElement);
+    scrollToBottom2(popupMessagesContainer);
+}
+function scrollToBottom2(container) {
+    container.scrollTop = container.scrollHeight;
+}
+
+// Show/hide popup
+
+
+
+
+
 // mute 
 const muteButton = document.querySelector('#mute');
 const unmuteButton = document.querySelector('#unmute');
+const muteVideoButton = document.querySelector('#muteVideo');
+const unmuteVideoButton = document.querySelector('#unmuteVideo');
 
 muteButton.addEventListener('click', () => {
     toggleAudio(true);
@@ -353,6 +436,18 @@ unmuteButton.addEventListener('click', () => {
     unmuteButton.style.display = 'none';
 });
 
+muteVideoButton.addEventListener('click', () => {
+    toggleVideo(true);
+    muteVideoButton.style.display = 'none';
+    unmuteVideoButton.style.display = 'block';
+});
+
+unmuteVideoButton.addEventListener('click', () => {
+    toggleVideo(false);
+    muteVideoButton.style.display = 'block';
+    unmuteVideoButton.style.display = 'none';
+});
+
 function toggleAudio(muted) {
     if (localStream) {
         localStream.getAudioTracks().forEach(track => {
@@ -360,6 +455,15 @@ function toggleAudio(muted) {
         });
     }
 }
+
+function toggleVideo(muted) {
+    if (localStream) {
+        localStream.getVideoTracks().forEach(track => {
+            track.enabled = !muted;
+        });
+    }
+}
+
 
 
 
@@ -376,4 +480,70 @@ function toggleAudio(muted) {
 //   }, 5000);
 
 
-// modifiy the only for when open the page it will automatically take camera accesss 
+// window.addEventListener('beforeunload', (event) => {
+//     // Your code here
+
+//     if (peerConnection) {
+//         peerConnection.close();
+
+//         // Reset the peer connection
+//         peerConnection = null;
+//         didIOffer = false;
+
+//         socket.emit('hangUp', { token: token });
+// alert("You have been disconnected from the call");
+
+//     }
+//     if (localStream) {
+//         localStream.getTracks().forEach(track => track.stop());
+//     }
+//     if (remoteStream) {
+//         remoteStream.getTracks().forEach(track => track.stop());
+//     }
+//     //remoteVideoEl.style.display = 'none'; // Hide the remote video element
+//     console.log("peerConnection closed and streams stopped! Hang up complete! Bye! Bye!"); 
+    
+//    // hangUpClient();
+    
+//   });
+
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// Create an AnalyserNode
+const analyser = audioContext.createAnalyser();
+analyser.fftSize = 256; // Adjust this value if needed
+
+// Create a MediaStreamSource from the remote audio stream
+const source = audioContext.createMediaStreamSource(remoteStream);
+
+// Connect the source to the analyser
+source.connect(analyser);
+
+// Create a Uint8Array to store the analyser data
+const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+// Function to update the audio level
+function updateAudioLevel() {
+  // Get the audio level data
+  analyser.getByteFrequencyData(dataArray);
+
+  // Calculate the average audio level
+  let sum = 0;
+  for (let i = 0; i < dataArray.length; i++) {
+    sum += dataArray[i];
+  }
+  const average = sum / dataArray.length;
+
+  // Display the audio level (e.g., updating a progress bar or a visual indicator)
+  const audioLevelElement = document.getElementById('remote-audio-level');
+  if (audioLevelElement) {
+    audioLevelElement.style.width = `${average}%`;
+  }
+
+  // Repeat the function at the next animation frame
+  requestAnimationFrame(updateAudioLevel);
+}
+
+// Start updating the audio level
+updateAudioLevel();
